@@ -5,23 +5,23 @@ from fastapi.responses import JSONResponse
 from fastapi import APIRouter, status
 
 from api.dependencies import UOWBaffler
-from modules.baffler.service import BufflerService
-from modules.baffler.schemas.payload import Task
+from modules.bookshelf_manager.service import BookshelfService
+from modules.bookshelf_manager.schemas.payload import User
 from utils import validation
 
 sys.path.append(Path(__file__).parent.__str__())  # pylint: disable=C2801
 
-router = APIRouter(prefix="/api",
+router = APIRouter(prefix="/api/v1/",
                    responses={404: {
                        "description": "Not found"
                    }})
 
 
-@router.get("/tasks", 
-            tags=["Задачи"],
-            summary="Получение всех задач")
-async def get_tables(uow: UOWBaffler) -> list[Task]:
-    instance = await BufflerService().get_tasks(uow)
+@router.get("/users", 
+            tags=["Users"],
+            summary="Get users")
+async def get_tables(uow: UOWBaffler) -> list[User]:
+    instance = await BookshelfService().get_tasks(uow)
     return instance
 
 
@@ -37,7 +37,7 @@ async def get_tables(uow: UOWBaffler) -> list[Task]:
 * Инстанс созданной задачи
              """)
 async def create_table(table: Task, uow: UOWBaffler) -> Task:
-    instance = await BufflerService().add_table(uow, table)
+    instance = await BookshelfService().add_table(uow, table)
     return JSONResponse(validation(Task, instance),
                         status_code=status.HTTP_201_CREATED)
 
@@ -54,5 +54,5 @@ async def create_table(table: Task, uow: UOWBaffler) -> Task:
 * **400 BAD_REQUEST** - заданной задачи не существует
              """)
 async def delete_table(id: int, uow: UOWBaffler) -> JSONResponse:
-    await BufflerService().delete_task(uow, id)
+    await BookshelfService().delete_task(uow, id)
     return JSONResponse("Задача успешно удалена!", status_code=status.HTTP_200_OK)

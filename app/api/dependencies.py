@@ -3,6 +3,6 @@ from typing import Annotated
 from fastapi import Depends
 
 from unitofwork import AbstractUnitOfWork
-from modules.baffler.uow import BafflerUnitofWork
+from modules.bookshelf_manager.uow import BookshelfUnitofWork
 
-UOWBaffler = Annotated[AbstractUnitOfWork, Depends(BafflerUnitofWork)]
+UOWBaffler = Annotated[AbstractUnitOfWork, Depends(BookshelfUnitofWork)]

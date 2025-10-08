@@ -3,11 +3,11 @@ from loguru import logger
 from sqlalchemy.orm.exc import NoResultFound
 
 from unitofwork import AbstractUnitOfWork
-from modules.baffler.schemas.payload import Task
+from modules.bookshelf_manager.schemas.payload import Task
 from api.dependencies import UOWBaffler
 
 
-class BufflerService:
+class BookshelfService:
     
     async def get_tasks(self, uow: AbstractUnitOfWork):
         logger.info(
