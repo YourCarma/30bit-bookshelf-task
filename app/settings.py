@@ -12,11 +12,11 @@ class Settings(BaseSettings):
     PORT: Optional[int] = 65000
 
     # Database credentials
-    POSTGRES_USER: Optional[str]
-    POSTGRES_PASSWORD: Optional[str]
-    POSTGRES_HOST: Optional[str]
-    POSTGRES_DB: Optional[str]
-    POSTGRES_PORT: Optional[str]
+    POSTGRES_USER: Optional[str] = "postgres"
+    POSTGRES_PASSWORD: Optional[str] = "12345"
+    POSTGRES_HOST: Optional[str] = "localhost"
+    POSTGRES_DB: Optional[str] = "bookshelf"
+    POSTGRES_PORT: Optional[str] = "5432"
 
     @property
     def DB_URL(cls):

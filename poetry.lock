@@ -2018,4 +2018,4 @@ platformdirs = ">=3.5.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "03e509cc85e8c473d7f5f89c47815947f72cbdea70665129a868772ac9055a08"
+content-hash = "2363b064f6f9979aefb0a936070fa13437f0a283a725aee04bf25ca0781b25ab"
