@@ -11,7 +11,7 @@ from utils import validation
 
 sys.path.append(Path(__file__).parent.__str__())  # pylint: disable=C2801
 
-router = APIRouter(prefix="/api/v1/",
+router = APIRouter(prefix="/api/v1",
                    responses={404: {
                        "description": "Not found"
                    }})
@@ -21,11 +21,11 @@ router = APIRouter(prefix="/api/v1/",
             tags=["Users"],
             summary="Get users")
 async def get_tables(uow: UOWBaffler) -> list[User]:
-    instance = await BookshelfService().get_tasks(uow)
+    instance = await BookshelfService().get_users(uow)
     return instance
 
 
-@router.post("/tasks", 
+@router.post("/users", 
              tags=["Задачи"],
              summary="Создание задачи",
              description="""
@@ -36,9 +36,9 @@ async def get_tables(uow: UOWBaffler) -> list[User]:
 ### Выходные данные:
 * Инстанс созданной задачи
              """)
-async def create_table(table: Task, uow: UOWBaffler) -> Task:
-    instance = await BookshelfService().add_table(uow, table)
-    return JSONResponse(validation(Task, instance),
+async def create_user(user: User, uow: UOWBaffler) -> User:
+    instance = await BookshelfService().add_user(uow, user)
+    return JSONResponse(validation(User, instance),
                         status_code=status.HTTP_201_CREATED)
 
 

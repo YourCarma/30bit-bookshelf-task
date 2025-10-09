@@ -72,12 +72,12 @@ class DatabaseRepository(Generic[Model]):
         return object_
 
 
-    async def get_by_title_or_create(self, title: str, values: dict) -> Model:
+    async def get_by_display_name_or_create(self, display_name: str, values: dict) -> Model:
         instance = self.model(**values)
-        objects = await self.filter(self.model.title == title)
+        objects = await self.filter(self.model.display_name == display_name)
         if not objects:
             self.session.add(instance)
-            objects = await self.filter(self.model.title == title)
+            objects = await self.filter(self.model.display_name == display_name)
         else:
             logger.exception("Объект уже существует...Пропуск")
             raise ValueError()

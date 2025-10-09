@@ -21,7 +21,7 @@ class BookshelfUnitofWork(AbstractUnitOfWork):
     async def __aenter__(self):
         try:
             self.session = self.factory()
-            self.tasks = DatabaseRepository(models.Users, self.session)
+            self.users = DatabaseRepository(models.Users, self.session)
             self.items = DatabaseRepository(models.Items, self.session)
             self.tags = DatabaseRepository(models.Tags, self.session)
             

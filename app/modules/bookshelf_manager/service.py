@@ -3,49 +3,49 @@ from loguru import logger
 from sqlalchemy.orm.exc import NoResultFound
 
 from unitofwork import AbstractUnitOfWork
-from modules.bookshelf_manager.schemas.payload import Task
+from modules.bookshelf_manager.schemas.payload import User
 from api.dependencies import UOWBaffler
 
 
 class BookshelfService:
     
-    async def get_tasks(self, uow: AbstractUnitOfWork):
+    async def get_users(self, uow: AbstractUnitOfWork):
         logger.info(
             "\n\tПолучение списка задач"
             )
         async with uow:
             try:
-                tasks = await uow.tasks.get_all()
+                tasks = await uow.users.get_all()
                 logger.success(
-                    "\n\tЗадачи: \n"
+                    "\n\tUsers: \n"
                     f"\t {tasks}"
                     )
             except Exception as e:
-                logger.error(f"Ошибка в получении списка задач: {e}")
-                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Ошибка в получении списка задач")
+                logger.error(f"Ошибка в получении списка пользователей: {e}")
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Ошибка в получении списка пользователей")
             return tasks
     
-    async def add_table(self, uow: AbstractUnitOfWork, task_data: Task):
-        data = task_data.model_dump(exclude={'id'})
+    async def add_user(self, uow: AbstractUnitOfWork, user_data: User):
+        data = user_data.model_dump(exclude={'id'})
         logger.info(
             f"\n\tСоздание задачи:"
             f"{data}"
         )
-        title = data.get("title")
+        display_name = data.get("display_name")
         async with uow:
             try:
-                task = await uow.tasks.get_by_title_or_create(
-                    title,
+                task = await uow.users.get_by_display_name_or_create(
+                    display_name,
                     {
                         **data
                     }
                     )
                 await uow.commit()
-                logger.success(f"Стол '{data.get("title")}' успешно создан!")
+                logger.success(f"Пользователь '{data.get("display_name")}' успешно создан!")
             except ValueError as e:
                 await uow.rollback()
-                logger.error(f"Стол {data.get("title")} уже существует!")
-                raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Задача '{data.get("title")}' уже существует!")
+                logger.error(f"Пользователь {data.get("display_name")} уже существует!")
+                raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Пользователь '{data.get("display_name")}' уже существует!")
             except Exception as e:
                 await uow.rollback()
                 logger.error(f"Ошибка при создании задачи: {str(e)}")

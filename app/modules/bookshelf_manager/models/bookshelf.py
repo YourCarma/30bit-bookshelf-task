@@ -50,7 +50,6 @@ class Tags(Base):
             "Users", back_populates="tags")
     
     items: Mapped[list["Items"]] = relationship(
-        "Items",
         secondary=items_tags_association_table,
         back_populates="tags"
     )
