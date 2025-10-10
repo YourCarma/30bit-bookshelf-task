@@ -65,7 +65,6 @@ class BookshelfService:
                 await uow.rollback()
                 logger.error(f"Пользователь {data.get("display_name")} уже существует!")
                 raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Пользователь '{data.get("display_name")}' уже существует!")
-            except Integr
             except Exception as e:
                 await uow.rollback()
                 logger.error(f"Ошибка при создании пользователя: {str(e)}")

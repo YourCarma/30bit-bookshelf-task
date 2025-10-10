@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import (
     mapped_column, relationship, Mapped
 )
-from sqlalchemy import String, ForeignKey, Integer, Table, Text, Column, Enum
+from sqlalchemy import String, ForeignKey, Integer, Table, Text, Column, Enum, UniqueConstraint
 from database.base import Base
 
 from modules.bookshelf_manager.schemas.units import Kind, Priority, Status
@@ -46,12 +46,14 @@ class Tags(Base):
     __tablename__ = "tags"
     id = mapped_column(Integer, primary_key= True, autoincrement=True)
     user_id = mapped_column(Integer, ForeignKey("users.id"))
+    name = mapped_column(String(50), nullable=True)
+    
     user: Mapped[Users] = relationship(
             "Users", back_populates="tags")
-    
     items: Mapped[list["Items"]] = relationship(
         secondary=items_tags_association_table,
         back_populates="tags"
     )
+    UniqueConstraint('name', 'user', name='unique_name_for_user')
     
     
