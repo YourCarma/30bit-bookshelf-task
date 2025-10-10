@@ -23,8 +23,8 @@ class Users(Base):
     id = mapped_column(Integer, primary_key= True, autoincrement=True)
     email = mapped_column(String(255), nullable=False, unique=True)
     display_name = mapped_column(String(50), nullable=False)
-    items: Mapped[list["Items"]] = relationship("Items", back_populates="user", cascade='save-update, merge, delete')
-    tags: Mapped[list["Tags"]] = relationship("Tags", back_populates="user", cascade='save-update, merge, delete')
+    items: Mapped[list["Items"]] = relationship("Items", back_populates="user", cascade='save-update, merge, delete', lazy="selectin")
+    tags: Mapped[list["Tags"]] = relationship("Tags", back_populates="user", cascade='save-update, merge, delete', lazy="selectin")
 
 class Items(Base):
     __tablename__ = "items"
@@ -37,7 +37,8 @@ class Items(Base):
     
     user: Mapped[Users] = relationship(
         "Users",
-        back_populates="items"
+        back_populates="items",
+        lazy="selectin"
     )
     
     tags: Mapped[list["Tags"]] = relationship(secondary=items_tags_association_table, back_populates="items", lazy="selectin")
@@ -49,11 +50,15 @@ class Tags(Base):
     name = mapped_column(String(50), nullable=True)
     
     user: Mapped[Users] = relationship(
-            "Users", back_populates="tags")
+            "Users", back_populates="tags", lazy="selectin")
+    
     items: Mapped[list["Items"]] = relationship(
         secondary=items_tags_association_table,
-        back_populates="tags"
+        back_populates="tags",
+        lazy="selectin"
     )
-    UniqueConstraint('name', 'user', name='unique_name_for_user')
+    __table_args__ = (
+        UniqueConstraint('name', 'user_id', name='unique_name_for_user'),
+    )
     
     

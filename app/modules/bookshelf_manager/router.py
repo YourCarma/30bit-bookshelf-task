@@ -3,10 +3,12 @@ from pathlib import Path
 
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, status
+from loguru import logger
 
 from api.dependencies import UOWBaffler
 from modules.bookshelf_manager.service import BookshelfService
 from modules.bookshelf_manager.schemas.payload import User
+from modules.bookshelf_manager.schemas.responses import UserResponse
 from utils import validation
 
 sys.path.append(Path(__file__).parent.__str__())  # pylint: disable=C2801
@@ -20,14 +22,14 @@ router = APIRouter(prefix="/api/v1",
 @router.get("/users", 
             tags=["Users"],
             summary="Get users")
-async def get_tables(uow: UOWBaffler) -> list[User]:
+async def get_users(uow: UOWBaffler) -> list[UserResponse]:
     instance = await BookshelfService().get_users(uow)
-    return instance
+    return validation(UserResponse, instance)
 
 @router.get("/users/{id}", 
             tags=["Users"],
             summary="Get users by id")
-async def get_tables(id: int, uow: UOWBaffler) -> User:
+async def get_user_by_id(id: int, uow: UOWBaffler) -> UserResponse:
     instance = await BookshelfService().get_user_by_id(id, uow)
     return instance
 
@@ -37,7 +39,7 @@ async def get_tables(id: int, uow: UOWBaffler) -> User:
              description="""
 
              """)
-async def create_user(user: User, uow: UOWBaffler) -> User:
+async def create_user(user: User, uow: UOWBaffler) -> UserResponse:
     instance = await BookshelfService().add_user(uow, user)
     return JSONResponse(validation(User, instance),
                         status_code=status.HTTP_201_CREATED)
