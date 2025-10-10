@@ -7,13 +7,13 @@ from modules.bookshelf_manager.schemas.units import Kind, Status, Priority
 
 class User(BaseModel):
     id: Optional[int] = Field(
-        default= None, description="ID пользователя", examples=[1, 2]
+        default=None, description="ID пользователя", examples=[1, 2]
     )
     email: EmailStr = Field(
-        description="Email пользователя", examples=["Выполнить тестовое задание", "Отправить решение"]
+        description="Email пользователя", examples=["user@example.ru"]
     )
-    display_name: bool = Field(
-        description="Отображаемое имя пользователя", examples=[True, False]
+    display_name: str = Field(
+        description="Отображаемое имя пользователя", examples=["Иван Натаныч"]
     )
     
 class Item(BaseModel):

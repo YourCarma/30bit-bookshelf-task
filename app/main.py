@@ -4,6 +4,7 @@ from datetime import datetime
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 import uvicorn
@@ -19,7 +20,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Сервис управления задачами",
+app = FastAPI(title="Сервис управления письменными материалами пользователя",
                   description="""
 # Тестовое задание
 ### Модули сервиса:
@@ -60,9 +61,17 @@ async def request_timer(request: Request, call_next):
     return response
 
 
-@app.get("/health", tags=["Проверка состояния сервиса"])
-def health():
-    return {"status": "OK"}
+@app.get('/', tags=['System'], response_class=HTMLResponse)
+async def get_root():
+    return """
+        <a href="/docs">ДОКУМЕНТАЦИЯ</a>
+    """
+
+@app.get('/health', tags=['System'])
+async def health_check():
+    return {
+        'status': "Ok",
+    }
 
 
 if __name__ == '__main__':

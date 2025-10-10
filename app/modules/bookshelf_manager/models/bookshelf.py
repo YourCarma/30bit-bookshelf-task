@@ -11,7 +11,7 @@ from modules.bookshelf_manager.schemas.units import Kind, Priority, Status
 
 
 items_tags_association_table  = Table(
-    "items_tagse_association_table",
+    "items_tags_association_table",
     Base.metadata,
     Column("item_id", ForeignKey("items.id")),
     Column("tag_id", ForeignKey("tags.id"))
@@ -40,7 +40,7 @@ class Items(Base):
         back_populates="items"
     )
     
-    tags: Mapped[list["Tags"]] = relationship(secondary=items_tags_association_table, backref="items", lazy="selectin")
+    tags: Mapped[list["Tags"]] = relationship(secondary=items_tags_association_table, back_populates="items", lazy="selectin")
     
 class Tags(Base):
     __tablename__ = "tags"

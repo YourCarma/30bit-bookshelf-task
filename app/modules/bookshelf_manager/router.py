@@ -24,17 +24,18 @@ async def get_tables(uow: UOWBaffler) -> list[User]:
     instance = await BookshelfService().get_users(uow)
     return instance
 
+@router.get("/users/{id}", 
+            tags=["Users"],
+            summary="Get users by id")
+async def get_tables(id: int, uow: UOWBaffler) -> User:
+    instance = await BookshelfService().get_user_by_id(id, uow)
+    return instance
 
 @router.post("/users", 
-             tags=["Задачи"],
-             summary="Создание задачи",
+             tags=["Users"],
+             summary="Create User",
              description="""
-## Добавление задачи.
-### Входные данные:
-*  **title** `str` - Желаемое имя (Уникальное) задачи (Задача №1, Задача №2...)
-*  **complete** `bool` - Задача выполнена
-### Выходные данные:
-* Инстанс созданной задачи
+
              """)
 async def create_user(user: User, uow: UOWBaffler) -> User:
     instance = await BookshelfService().add_user(uow, user)
