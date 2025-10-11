@@ -2,13 +2,16 @@ import sys
 from pathlib import Path
 
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
 from loguru import logger
 
 from api.dependencies import UOWBaffler
 from modules.bookshelf_manager.service import BookshelfService
 from modules.bookshelf_manager.schemas.payload import User
 from modules.bookshelf_manager.schemas.responses import UserResponse
+from modules.bookshelf_manager.schemas.requests import CreateUser
+from modules.bookshelf_manager.schemas.filters import UserFilter, PaginationAndSorting, user_filter_dependency
+
 from utils import validation
 
 sys.path.append(Path(__file__).parent.__str__())  # pylint: disable=C2801
@@ -22,8 +25,8 @@ router = APIRouter(prefix="/api/v1",
 @router.get("/users", 
             tags=["Users"],
             summary="Get users")
-async def get_users(uow: UOWBaffler) -> list[UserResponse]:
-    instance = await BookshelfService().get_users(uow)
+async def get_users(uow: UOWBaffler, filters: UserFilter = Depends(user_filter_dependency), sorting_params: PaginationAndSorting = Depends()) -> list[UserResponse]:
+    instance = await BookshelfService().get_users_by_filters(uow, filters, sorting_params)
     return validation(UserResponse, instance)
 
 @router.get("/users/{id}", 
@@ -37,25 +40,16 @@ async def get_user_by_id(id: int, uow: UOWBaffler) -> UserResponse:
              tags=["Users"],
              summary="Create User",
              description="""
-
              """)
-async def create_user(user: User, uow: UOWBaffler) -> UserResponse:
+async def create_user(user: CreateUser, uow: UOWBaffler) -> UserResponse:
     instance = await BookshelfService().add_user(uow, user)
-    return JSONResponse(validation(User, instance),
-                        status_code=status.HTTP_201_CREATED)
+    return instance
 
-
-@router.delete("/tasks/{id}", 
-               tags=["Задачи"],
-               summary="Удаление задачи по id",
+@router.delete("/users/{id}", 
+               tags=["Users"],
+               summary="Delete user by id",
                 description="""
-## Удаление задачи.
-### Входные данные:
-*  **id** `int` - id удаляемой задачи
-### Выходные данные:
-* **200 OK** - задача успешно удалена
-* **400 BAD_REQUEST** - заданной задачи не существует
              """)
 async def delete_table(id: int, uow: UOWBaffler) -> JSONResponse:
-    await BookshelfService().delete_task(uow, id)
-    return JSONResponse("Задача успешно удалена!", status_code=status.HTTP_200_OK)
+    await BookshelfService().delete_user(uow, id)
+    return JSONResponse("Пользователь успешно удален!", status_code=status.HTTP_200_OK)

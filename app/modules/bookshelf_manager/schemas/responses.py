@@ -1,4 +1,5 @@
 from typing import Optional, Union
+from datetime import datetime
 
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
@@ -20,6 +21,12 @@ class UserResponse(BaseModel):
     )
     tags: list[Tag] = Field(
         description="Теги пользователя"
+    )
+    created_at: datetime = Field(
+        description="Дата и время создания", examples=[datetime.now()]
+    )
+    updated_at: datetime = Field(
+        description="Дата и время обновления", examples=[datetime.now()]
     )
     
     model_config = ConfigDict(from_attributes=True)

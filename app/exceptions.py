@@ -29,3 +29,9 @@ class ResultNotFound(ServiceExceptions):
     def __init__(self, status_code = status.HTTP_404_NOT_FOUND, detail: str = "Объект не найден!"):
         super().__init__(status_code, detail)
         raise HTTPException(status_code=self.status_code, detail=self.detail)
+    
+class AlreadyExists(ServiceExceptions):
+
+    def __init__(self, status_code = status.HTTP_400_BAD_REQUEST, detail: str = "Объект не найден!"):
+        super().__init__(status_code, detail)
+        raise HTTPException(status_code=self.status_code, detail=self.detail)

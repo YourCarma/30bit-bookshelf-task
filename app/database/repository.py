@@ -39,6 +39,40 @@ class DatabaseRepository(Generic[Model]):
                 f"Non unique-values, proceed next, details: \n{error}")
             await self.session.rollback()
 
+    async def apply_filters(self, filters: dict):
+        logger.debug("Применение фильторв...")
+        query = select(self.model)
+        for field, value in filters.items():
+            logger.debug(f"Элемент фильтрации: {field}:{value}")
+            if value is None:
+                logger.warning("Элемент не подлежит фильтрации!")
+                continue
+            match field:
+                case "created_from":
+                    query = query.filter(self.model.created_at >= value)
+                    continue
+                case "created_to":
+                    query = query.filter(self.model.created_at <= value)
+                    continue
+                case "updated_from":
+                    query = query.filter(self.model.updated_at >= value)
+                    continue
+                case "updated_to":
+                    query = query.filter(self.model.updated_at <= value)
+                    continue
+            column = getattr(self.model, field, None)
+            logger.debug(column)
+            if column is not None:
+                if isinstance(value, str):
+                    query = query.filter(column.ilike(f"%{value}%"))
+                else:
+                    query = query.filter(column == value)
+
+        result = (await self.session.scalars(query)).all()
+        logger.debug(result)
+        
+        return result
+    
     async def filter(
         self,
         *expressions: BinaryExpression,
@@ -48,6 +82,7 @@ class DatabaseRepository(Generic[Model]):
             query = query.where(*expressions)
         return list(await self.session.scalars(query))
 
+    
     async def get_by_filter_or_create(
         self,
         values: dict,
@@ -70,7 +105,6 @@ class DatabaseRepository(Generic[Model]):
         query = select(self.model).where(self.model.id == id_)
         object_ = (await self.session.scalars(query)).one_or_none()
         return object_
-
 
     async def get_by_display_name_or_create(self, display_name: str, values: dict) -> Model:
         instance = self.model(**values)
@@ -185,5 +219,5 @@ class DatabaseRepository(Generic[Model]):
             await self.delete_instance(result)
         except NoResultFound as e:
             logger.error("Объекта на удаление не существует!")
-            raise NoResultFound()
+            raise NoResultFound
         return
