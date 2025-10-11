@@ -18,6 +18,7 @@ sys.path.append(Path(__file__).parent.__str__())  # pylint: disable=C2801
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
+    pass
 
 
 app = FastAPI(title="Сервис управления письменными материалами пользователя",

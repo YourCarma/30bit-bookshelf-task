@@ -3,7 +3,9 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
-from modules.bookshelf_manager.schemas.payload import Tag, Item, User
+from modules.users_manager.schemas.units import User
+from modules.items_manager.schemas.units import Item
+from modules.tags_manager.schemas.units import Tag
 
 
 class UserResponse(BaseModel):

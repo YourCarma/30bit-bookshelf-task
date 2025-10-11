@@ -1,11 +1,11 @@
 from database.connection import async_session_maker
-from modules.bookshelf_manager import models
+from modules import models
 from loguru import logger
 from sqlalchemy import func
 from fastapi import HTTPException, status
 from sqlalchemy.exc import OperationalError
 
-from modules.bookshelf_manager.models import *
+from modules.models import *
 from database.repository import DatabaseRepository
 from unitofwork import AbstractUnitOfWork
 from exceptions import ServiceUnavailable

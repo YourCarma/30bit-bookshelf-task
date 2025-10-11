@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 from database import Base
-from modules.bookshelf_manager import models as bookshelf_models
+from modules import models as bookshelf_models
 from settings import settings
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

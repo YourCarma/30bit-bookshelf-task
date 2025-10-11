@@ -5,7 +5,6 @@ from enum import Enum
 from fastapi import Query
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
-from modules.bookshelf_manager.schemas.payload import Tag, Item, User
 
 class UserSortingParams(str, Enum):
     CREATED_AT = "created_at" 

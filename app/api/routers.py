@@ -1,5 +1,9 @@
-from modules.bookshelf_manager.router import router as bookshelf_router
+from modules.users_manager.router import router as users_router
+from modules.items_manager.router import router as items_router
+from modules.tags_manager.router import router as tags_router
 
 routers = [
-    bookshelf_router,
+    users_router,
+    items_router,
+    tags_router,
 ]

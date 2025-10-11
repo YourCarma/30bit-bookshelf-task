@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, EmailStr
 
-from modules.bookshelf_manager.schemas.units import Kind, Status, Priority
+from modules.items_manager.schemas.units import Kind, Status, Priority
 
 class CreatePutUser(BaseModel):
     email: EmailStr = Field(

@@ -7,7 +7,7 @@ from sqlalchemy.orm import (
 from sqlalchemy import String, ForeignKey, Integer, Table, Text, Column, Enum, UniqueConstraint
 from database.base import Base
 
-from modules.bookshelf_manager.schemas.units import Kind, Priority, Status
+from modules.items_manager.schemas.units import Kind, Priority, Status
 
 
 items_tags_association_table  = Table(
@@ -16,7 +16,6 @@ items_tags_association_table  = Table(
     Column("item_id", ForeignKey("items.id")),
     Column("tag_id", ForeignKey("tags.id"))
 )
-
 
 class Users(Base):
     __tablename__ = "users"
@@ -30,6 +29,7 @@ class Items(Base):
     __tablename__ = "items"
     id = mapped_column(Integer, primary_key= True, autoincrement=True)
     user_id = mapped_column(Integer, ForeignKey("users.id"))
+    title = mapped_column(String(100), nullable=False)
     kind = mapped_column(Enum(Kind), nullable=False, default=Kind.ARTICLE.value)
     status = mapped_column(Enum(Status), nullable=False, default=Status.PLANNED.value)
     priority = mapped_column(Enum(Priority), nullable=False, default=Priority.NORMAL.value)

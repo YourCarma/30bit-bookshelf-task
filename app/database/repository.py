@@ -34,11 +34,13 @@ class DatabaseRepository(Generic[Model]):
             await self.session.flush()
             await self.session.refresh(instance)
             return instance
-        except (asyncpg.exceptions.UniqueViolationError,
-                IntegrityError) as error:
+        except asyncpg.exceptions.UniqueViolationError as error:
             logger.warning(
                 f"Non unique-values, proceed next, details: \n{error}")
             await self.session.rollback()
+        except IntegrityError as e:
+            logger.warning(e)
+            raise e
 
     async def apply_filters(self, filters: dict, sort_params: dict):
         logger.debug("Применение фильторв...")
@@ -177,6 +179,7 @@ class DatabaseRepository(Generic[Model]):
         await self.update_multiple_attrs_to_object(names=names,
                                                    values=values,
                                                    scalar_object=scalar_object)
+        
         return scalar_object
 
     async def update_multiple_attrs_to_object(self, names: list[str],
@@ -187,6 +190,7 @@ class DatabaseRepository(Generic[Model]):
             for name, value in zip(names, values)
         ]
         await self.session.flush()
+        await self.session.refresh(scalar_object)
         return scalar_object
 
     async def update_list(self, name: str, value: list, *expressions:
