@@ -1,4 +1,5 @@
 from typing import Generic, TypeVar, Any, Optional
+from datetime import datetime
 
 import asyncpg
 from loguru import logger
@@ -39,8 +40,10 @@ class DatabaseRepository(Generic[Model]):
                 f"Non unique-values, proceed next, details: \n{error}")
             await self.session.rollback()
 
-    async def apply_filters(self, filters: dict):
+    async def apply_filters(self, filters: dict, sort_params: dict):
         logger.debug("Применение фильторв...")
+        limit = sort_params.get("limit")
+        offset = sort_params.get("offset")
         query = select(self.model)
         for field, value in filters.items():
             logger.debug(f"Элемент фильтрации: {field}:{value}")
@@ -67,12 +70,27 @@ class DatabaseRepository(Generic[Model]):
                     query = query.filter(column.ilike(f"%{value}%"))
                 else:
                     query = query.filter(column == value)
-
-        result = (await self.session.scalars(query)).all()
-        logger.debug(result)
-        
-        return result
+        query = self.sort_items(query, sort_params)
+        query = query.limit(limit).offset(limit*offset)
+        filtered_users = (await self.session.scalars(query)).all()
+        return filtered_users
     
+    def sort_items(self, query, sort_params: dict):
+        sort_by = sort_params.get("sort_by").value
+        desc = sort_params.get("desc")
+        logger.debug(sort_by)
+        if hasattr(self.model, sort_by):
+            column = getattr(self.model, sort_by)
+            if desc:
+                query = query.order_by(column.desc())
+                logger.debug(query)
+            else:
+                query = query.order_by(column.asc())
+        else:
+            logger.warning(f"Поле {sort_by} не найдено в модели, используется сортировка по умолчанию (id)")
+            query = query.order_by(self.model.id.asc())
+        return query
+            
     async def filter(
         self,
         *expressions: BinaryExpression,
@@ -154,6 +172,8 @@ class DatabaseRepository(Generic[Model]):
                                     *expressions: BinaryExpression) -> Model:
         scalar_object = (await self.session.scalars(
             select(self.model).where(*expressions))).one()
+        updated_at = datetime.now()
+        setattr(scalar_object, 'updated_at', updated_at)
         await self.update_multiple_attrs_to_object(names=names,
                                                    values=values,
                                                    scalar_object=scalar_object)

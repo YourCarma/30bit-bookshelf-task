@@ -9,7 +9,7 @@ from api.dependencies import UOWBaffler
 from modules.bookshelf_manager.service import BookshelfService
 from modules.bookshelf_manager.schemas.payload import User
 from modules.bookshelf_manager.schemas.responses import UserResponse
-from modules.bookshelf_manager.schemas.requests import CreateUser
+from modules.bookshelf_manager.schemas.requests import CreatePutUser, PatchUser
 from modules.bookshelf_manager.schemas.filters import UserFilter, PaginationAndSorting, user_filter_dependency
 
 from utils import validation
@@ -41,7 +41,7 @@ async def get_user_by_id(id: int, uow: UOWBaffler) -> UserResponse:
              summary="Create User",
              description="""
              """)
-async def create_user(user: CreateUser, uow: UOWBaffler) -> UserResponse:
+async def create_user(user: CreatePutUser, uow: UOWBaffler) -> UserResponse:
     instance = await BookshelfService().add_user(uow, user)
     return instance
 
@@ -50,6 +50,15 @@ async def create_user(user: CreateUser, uow: UOWBaffler) -> UserResponse:
                summary="Delete user by id",
                 description="""
              """)
-async def delete_table(id: int, uow: UOWBaffler) -> JSONResponse:
+async def delete_user(id: int, uow: UOWBaffler) -> JSONResponse:
     await BookshelfService().delete_user(uow, id)
     return JSONResponse("Пользователь успешно удален!", status_code=status.HTTP_200_OK)
+
+@router.patch("/users/{id}", 
+               tags=["Users"],
+               summary="Delete user by id",
+                description="""
+             """)
+async def patch_user(id: int,  uow: UOWBaffler, update_data: PatchUser) -> UserResponse:
+    result = await BookshelfService().update_user(uow, id, update_data)
+    return result

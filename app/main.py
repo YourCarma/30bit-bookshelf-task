@@ -49,7 +49,7 @@ async def request_timer(request: Request, call_next):
     start_time = datetime.now()
     logger.debug(f"\n\t[ ]Получен запрос\n"
                  f"\n\tКлиент: {request.client.host}:{request.client.port}\n"
-                 f"\tПо адресу: {request.url}\n")
+                 f"\tПо адресу: {request.method} {request.url}\n")
     response = await call_next(request)
     process_time = datetime.now() - start_time
 

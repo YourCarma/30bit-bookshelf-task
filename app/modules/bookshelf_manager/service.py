@@ -5,14 +5,16 @@ from sqlalchemy.exc import IntegrityError
 
 from unitofwork import AbstractUnitOfWork
 from modules.bookshelf_manager.schemas.payload import User
-from modules.bookshelf_manager.schemas.filters import UserFilter, UserSortingParams
+from modules.bookshelf_manager.schemas.requests import CreatePutUser, PatchUser
+from modules.bookshelf_manager.schemas.filters import UserFilter, UserSortingParams, PaginationAndSorting
+from modules.bookshelf_manager.schemas.responses import UserResponse
 from api.dependencies import UOWBaffler
 from exceptions import ResultNotFound, AlreadyExists
 
 
 class BookshelfService:
     
-    async def get_all_users(self, uow: AbstractUnitOfWork):
+    async def get_all_users(self, uow: AbstractUnitOfWork) -> list[UserResponse]:
         logger.info(
             "\n\tПолучение списка пользователей"
             )
@@ -28,11 +30,12 @@ class BookshelfService:
                 raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Ошибка в получении списка пользователей")
             return users
     
-    async def get_users_by_filters(self, uow: AbstractUnitOfWork, filters: UserFilter, sorting_params: UserSortingParams):
+    async def get_users_by_filters(self, uow: AbstractUnitOfWork, filters: UserFilter, sorting_params: PaginationAndSorting) -> list[UserResponse]:
         async with uow:
             try:
                 filters = filters.model_dump()
-                filtered_users = await uow.users.apply_filters(filters)
+                sort_by = sorting_params.model_dump()
+                filtered_users = await uow.users.apply_filters(filters, sort_by)
             except Exception as e:
                 logger.error(f"Ошибка в получении списка пользователей: {e}")
                 raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Ошибка в получении списка пользователей")
@@ -56,7 +59,7 @@ class BookshelfService:
 
             
     
-    async def add_user(self, uow: AbstractUnitOfWork, user_data: User):
+    async def add_user(self, uow: AbstractUnitOfWork, user_data: CreatePutUser) -> UserResponse:
         data = user_data.model_dump()
         logger.info(
             f"\n\tСоздание задачи:"
@@ -102,8 +105,30 @@ class BookshelfService:
                     )
                 raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Ошибка при удалении пользователя")
             
-    async def update_task(self, uow: AbstractUnitOfWork):
-        pass
+    async def update_user(self, uow: AbstractUnitOfWork, user_id: int, update_data: PatchUser) -> UserResponse:
+        async with uow:
+            try:
+                update_data = update_data.model_dump(exclude_unset=True)
+                names = update_data.keys()
+                values = update_data.values()
+                expression = (uow.users.model.id == user_id)
+                result = await uow.users.update_multiple_attrs(names, values, expression)
+                await uow.commit()
+                return result
+            except NoResultFound as e:
+                await uow.rollback()
+                logger.error(f"Пользователя с id '{user_id}' не существует!")
+                raise ResultNotFound()
+            except IntegrityError as e:
+                await uow.rollback()
+                logger.error(f"Поля для ввода занято")
+                raise AlreadyExists(detail="Поле с таким именем уже занято!")
+            except Exception as e:
+                await uow.rollback()
+                logger.error(
+                    f"Ошибка при изменении пользователя: {e}"
+                    )
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Ошибка при изменении пользователя")
 
 
 
